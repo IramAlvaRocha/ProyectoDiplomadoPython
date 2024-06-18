@@ -11,7 +11,7 @@ class Licores():
 
         self.ventana_padre = tk.Tk()
         self.ventana_padre.title("PROYECTO FINAL - LICORES")
-        self.ventana_padre.geometry("650x400")
+        self.ventana_padre.geometry("600x400")
 
         self.ventana_padre.columnconfigure(3, weight=1)
         self.ventana_padre.columnconfigure(1, weight=1)
@@ -19,6 +19,8 @@ class Licores():
         self.ventana_padre.columnconfigure(4, weight=1)
         self.ventana_padre.rowconfigure(6, weight=2)
 
+        self.ventana_padre
+                                        
         self.labelframe1 = ttk.LabelFrame(self.ventana_padre, text="Búsqueda")
         self.labelframe1.grid(column=0, row=0, padx=5, pady=10, columnspan=5)
 
@@ -61,7 +63,8 @@ class Licores():
             else:
                 responseJson = responseFBI.json()
                 self.jsonResultados = responseJson
-                self.lblTotal.config(text=str(len(responseJson['drinks'])) + ' resultados')
+                self.lblTotal.config(text='Total de resultados: '+str(len(responseJson['drinks'])))
+                self.lblTotal.grid(row=6, column=1)
                 self.lista = []
                 # Clear the treeview list items
                 for item in self.tree.get_children():
@@ -74,7 +77,7 @@ class Licores():
                     count = count + 1
 
                 scrollbarY = ttk.Scrollbar(self.ventana_padre, orient="vertical", command=self.tree.yview)
-                scrollbarY.grid(row=7, column=5, sticky='nse')
+                scrollbarY.grid(row=7, column=6, sticky='nse')
                 self.tree.configure(yscroll=scrollbarY.set)
 
         except Exception as e:
