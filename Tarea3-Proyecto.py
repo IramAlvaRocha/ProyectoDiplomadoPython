@@ -92,11 +92,41 @@ class Licores():
                 self.mostrarVentanaDetalle(drink)
 
     def mostrarVentanaDetalle(self, drink):
-        detalle = tk.Toplevel(self.ventana_padre)
-        detalle.title("Detalle del Licor")
-        detalle.geometry("300x200")
+        ventana_nueva = tk.Toplevel()
+        ventana_nueva.geometry("700x500")
+        ventana_nueva.title("Detalle")
+        ventana_nueva.columnconfigure(0, weight=1)
+        ventana_nueva.columnconfigure(1, weight=1)
+        ventana_nueva.columnconfigure(2, weight=1)
+        self.ventana_nueva.columnconfigure(3, weight=1) 
+        #frame.pack(padx = 5, pady = 5)
+
+        idDrink = (drink['idDrink'] if drink['idDrink'] != None else '')
         
-        lblNombre = tk.Label(detalle, text="Nombre: " + drink['strDrink'])
-        lblNombre.pack(padx=10, pady=10)
+        urlDetails = 'https://www.thecocktaildb.com/api/json/v1/1/lookup.php'
+        params = {'i':idDrink}
+
+        # lblNombre = tk.Label(ventana_nueva, text='Nombre: ' + nombre).grid(column=0,row=0, padx=5, pady=5,sticky="W")
+        # lblClasificacion = tk.Label(ventana_nueva,text='Clasificación: ' + clasificacion).grid(column=0,row=1, padx=5, pady=5,sticky="W")
+        # lblGenero = tk.Label(ventana_nueva,text='Genero: ' + sex).grid(column=0,row=2, padx=5, pady=5,sticky="W")
+        # lblRaza = tk.Label(ventana_nueva,text='Raza: ' + raza).grid(column=0,row=3, padx=5, pady=5,sticky="W")
+        # lblCabello = tk.Label(ventana_nueva,text='Cabello: ' + cabello).grid(column=0,row=4, padx=5, pady=5,sticky="W")
+        # lblPeso = tk.Label(ventana_nueva,text='Peso: ' + peso).grid(column=0,row=5, padx=5, pady=5,sticky="W")
+        # lblOjos = tk.Label(ventana_nueva,text='Ojos: ' + ojos).grid(column=0,row=6, padx=5, pady=5,sticky="W")
+        # lblEdad = tk.Label(ventana_nueva,text='Edad: ' + rango_edad).grid(column=0,row=7, padx=5, pady=5,sticky="W")
+        # lblNacionalidad = tk.Label(ventana_nueva,text='Nacionalidad: ' + nacionalidad).grid(column=0,row=8, padx=5, pady=5,sticky="W")
+
+        try:
+            image_url = persona['images'][1]['original']
+            req = Request(image_url, headers={'User-Agent': 'Mozilla/5.0'})
+            raw_data = urlopen(req).read()
+            im = Image.open(BytesIO(raw_data))
+            im=im.resize((300,350), Image.LANCZOS)#Image.ANTIALIAS)
+            photo= ImageTk.PhotoImage(im)
+            imgLabel = tk.Label(ventana_nueva, image=photo) #imagen)
+            imgLabel.grid(column=2, row=0, rowspan=10, columnspan=3, padx=5, pady=5, sticky="W")
+        except Exception as e:
+            print(e)
+        ventana_nueva.mainloop()
 
 test = Licores()
