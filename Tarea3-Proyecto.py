@@ -5,10 +5,8 @@ from urllib.request import Request, urlopen
 import requests
 import warnings
 from PIL import Image, ImageTk
-
 class Licores():
-    def __init__(self) :
-
+    def __init__(self):
         self.ventana_padre = tk.Tk()
         self.ventana_padre.title("PROYECTO FINAL - LICORES")
         self.ventana_padre.geometry("600x400")
@@ -19,8 +17,6 @@ class Licores():
         self.ventana_padre.columnconfigure(4, weight=1)
         self.ventana_padre.rowconfigure(6, weight=2)
 
-        self.ventana_padre
-                                        
         self.labelframe1 = ttk.LabelFrame(self.ventana_padre, text="Búsqueda")
         self.labelframe1.grid(column=0, row=0, padx=5, pady=10, columnspan=5)
 
@@ -43,7 +39,7 @@ class Licores():
         self.tree.column("Bebida", minwidth=80, width=80, anchor=tk.W)
         self.tree.grid(row=7, column=1, columnspan=4, padx=6, pady=5, sticky='nsew')
         self.tree.bind('<<TreeviewSelect>>', self.verDetalle, True)
-        
+
         self.ventana_padre.mainloop()
 
     def buscaResultados(self):
@@ -54,7 +50,6 @@ class Licores():
 
         urlApi = "https://www.thecocktaildb.com/api/json/v1/1/filter.php"
         responseJson = {}
-        exError = None
         try:
             warnings.filterwarnings("ignore", message="Unverified HTTPS request")
             responseFBI = requests.get(urlApi, verify=False, params=parametros)
@@ -63,10 +58,9 @@ class Licores():
             else:
                 responseJson = responseFBI.json()
                 self.jsonResultados = responseJson
-                self.lblTotal.config(text='Total de resultados: '+str(len(responseJson['drinks'])))
+                self.lblTotal.config(text='Total de resultados: ' + str(len(responseJson['drinks'])))
                 self.lblTotal.grid(row=6, column=1)
                 self.lista = []
-                # Clear the treeview list items
                 for item in self.tree.get_children():
                     self.tree.delete(item)
                 for elemento in responseJson['drinks']:
@@ -74,7 +68,7 @@ class Licores():
                 count = 0
                 for buscado in self.lista:
                     self.tree.insert('', index='end', iid=count, text='', values=buscado)
-                    count = count + 1
+                    count += 1
 
                 scrollbarY = ttk.Scrollbar(self.ventana_padre, orient="vertical", command=self.tree.yview)
                 scrollbarY.grid(row=7, column=6, sticky='nse')
@@ -92,41 +86,51 @@ class Licores():
                 self.mostrarVentanaDetalle(drink)
 
     def mostrarVentanaDetalle(self, drink):
-        ventana_nueva = tk.Toplevel()
-        ventana_nueva.geometry("700x500")
-        ventana_nueva.title("Detalle")
-        ventana_nueva.columnconfigure(0, weight=1)
-        ventana_nueva.columnconfigure(1, weight=1)
-        ventana_nueva.columnconfigure(2, weight=1)
-        self.ventana_nueva.columnconfigure(3, weight=1) 
-        #frame.pack(padx = 5, pady = 5)
+        ventana_modal = tk.Toplevel()
+        ventana_modal.geometry("700x500")
+        ventana_modal.title("Detalle")
+        ventana_modal.columnconfigure(0, weight=1)
+        ventana_modal.columnconfigure(1, weight=1)
+        ventana_modal.columnconfigure(2, weight=1)
+        ventana_modal.columnconfigure(3, weight=1)
 
         idDrink = (drink['idDrink'] if drink['idDrink'] != None else '')
-        
-        urlDetails = 'https://www.thecocktaildb.com/api/json/v1/1/lookup.php'
-        params = {'i':idDrink}
 
-        # lblNombre = tk.Label(ventana_nueva, text='Nombre: ' + nombre).grid(column=0,row=0, padx=5, pady=5,sticky="W")
-        # lblClasificacion = tk.Label(ventana_nueva,text='Clasificación: ' + clasificacion).grid(column=0,row=1, padx=5, pady=5,sticky="W")
-        # lblGenero = tk.Label(ventana_nueva,text='Genero: ' + sex).grid(column=0,row=2, padx=5, pady=5,sticky="W")
-        # lblRaza = tk.Label(ventana_nueva,text='Raza: ' + raza).grid(column=0,row=3, padx=5, pady=5,sticky="W")
-        # lblCabello = tk.Label(ventana_nueva,text='Cabello: ' + cabello).grid(column=0,row=4, padx=5, pady=5,sticky="W")
-        # lblPeso = tk.Label(ventana_nueva,text='Peso: ' + peso).grid(column=0,row=5, padx=5, pady=5,sticky="W")
-        # lblOjos = tk.Label(ventana_nueva,text='Ojos: ' + ojos).grid(column=0,row=6, padx=5, pady=5,sticky="W")
-        # lblEdad = tk.Label(ventana_nueva,text='Edad: ' + rango_edad).grid(column=0,row=7, padx=5, pady=5,sticky="W")
-        # lblNacionalidad = tk.Label(ventana_nueva,text='Nacionalidad: ' + nacionalidad).grid(column=0,row=8, padx=5, pady=5,sticky="W")
+        urlDetails = 'https://www.thecocktaildb.com/api/json/v1/1/lookup.php'
+        paramsDetails = {'i': idDrink}
+
+        responseJSON = {}
+        responsDetails = requests.get(url=urlDetails, params=paramsDetails, verify=False)
+
+        if responsDetails.status_code != 200:
+            raise Exception("Error: " + responseJSON.reason)
+        else:
+            responseResultados = responsDetails.json().get("drinks", [])[0]
+            nombre = responseResultados["strDrink"]
+            categoria = responseResultados["strCategory"]
+            instrucciones = responseResultados["strInstructions"]
+            ingredientes = ', '.join([responseResultados.get(f'strIngredient{i}', '') for i in range(1, 16) if responseResultados.get(f'strIngredient{i}', '')])
+
+            lblNombre = tk.Label(ventana_modal, text='Nombre: ' + nombre).grid(column=0, row=0, padx=5, pady=5, sticky="W")
+            lblCategoria = tk.Label(ventana_modal, text='Categoría: ' + categoria).grid(column=0, row=1, padx=5, pady=5, sticky="W")
+            lblInstrucciones = tk.Label(ventana_modal, text='Instrucciones: ' + instrucciones, wraplength=400, justify="left")
+            lblInstrucciones.grid(column=0, row=2, padx=5, pady=5, sticky="W")
+            lblIngredientes = tk.Label(ventana_modal, text='Ingredientes: ' + ingredientes, wraplength=400, justify="left")
+            lblIngredientes.grid(column=0, row=3, padx=5, pady=5, sticky="W")
 
         try:
-            image_url = persona['images'][1]['original']
-            req = Request(image_url, headers={'User-Agent': 'Mozilla/5.0'})
-            raw_data = urlopen(req).read()
-            im = Image.open(BytesIO(raw_data))
-            im=im.resize((300,350), Image.LANCZOS)#Image.ANTIALIAS)
-            photo= ImageTk.PhotoImage(im)
-            imgLabel = tk.Label(ventana_nueva, image=photo) #imagen)
-            imgLabel.grid(column=2, row=0, rowspan=10, columnspan=3, padx=5, pady=5, sticky="W")
+            image_url = responseResultados.get('strDrinkThumb', '')
+            if image_url:
+                requesImg = Request(image_url, headers={'User-Agent': 'Mozilla/5.0'})
+                raw_data = urlopen(requesImg).read()
+                image = Image.open(BytesIO(raw_data))
+                image = image.resize((300, 350), Image.LANCZOS)
+                photo = ImageTk.PhotoImage(image)
+                imgLabel = tk.Label(ventana_modal, image=photo)
+                imgLabel.image = photo
+                imgLabel.grid(column=2, row=0, rowspan=10, columnspan=3, padx=5, pady=5, sticky="W")
         except Exception as e:
             print(e)
-        ventana_nueva.mainloop()
+        ventana_modal.mainloop()
 
 test = Licores()
